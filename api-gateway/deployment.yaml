@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-deploy
+  namespace: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apigateway-backend
+  template:
+    metadata:
+      labels:
+        app: apigateway-backend
+    spec:
+      containers:
+      - name: apigateway-backend
+        image: shejulv088/final_apigateway:v1
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: api-gateway-config
+
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+            #        resources:
+          #          requests:
+            #            memory: "150Mi"
+              #            cpu: "50m"
+              #          limits:
+            #            memory: "200Mi"
+            #            cpu: "100m"

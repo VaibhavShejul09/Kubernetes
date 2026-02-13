@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery-server-deploy
+  namespace: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discoveryserver-backend
+  template:
+    metadata:
+      labels:
+        app: discoveryserver-backend
+    spec:
+
+      containers:
+      - name: discovery-server
+        image: shejulv088/final_discovery_server:v1
+        ports:
+        - containerPort: 8761
+        
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 60
+          periodSeconds: 20
+
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 30
+          periodSeconds: 15
+            #        resources:
+          #          requests:
+            #            memory: "150Mi"
+              #            cpu: "50m"
+              #          limits:
+            #            memory: "200Mi"
+            #            cpu: "100m"

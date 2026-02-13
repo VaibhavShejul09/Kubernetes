@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: auth-service-deploy
+  namespace: my-app
+spec:
+  serviceName: mysql-auth-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-auth
+
+  template:
+    metadata:
+      labels:
+        app: mysql-auth
+    spec:
+      containers:
+      - name: mysql-auth-container
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-auth-secret
+              key: MYSQL_ROOT_PASSWORD
+
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: mysql-auth-config
+              key: MYSQL_DATABASE
+
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD
+          initialDelaySeconds: 180
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 6
+
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 6
+
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-backend-deploy
+  namespace: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-backend
+  template:
+    metadata:
+      labels:
+        app: auth-backend
+    spec:
+      initContainers:
+        - name: wait-for-mysql-auth
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL..."
+              until nc -z mysql-auth-service.my-app.svc.cluster.local 3306; do
+                sleep 5
+              done
+      containers:
+      - name: auth-backend
+        image: shejulv088/final_auth_service
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+        envFrom:
+        - configMapRef:
+            name: auth-backend-config
+        - secretRef:
+            name: auth-backend-secret
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 15
+            #        resources:
+          #          requests:
+            #            memory: "150Mi"
+              #            cpu: "50m"
+              #          limits:
+            #            memory: "200Mi"
+            #            cpu: "100m"
