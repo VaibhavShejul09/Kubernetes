@@ -6,4 +6,5 @@ metadata:
 data:
   SPRING_CONFIG_URI: http://config-server-service:8888
   SPRING_PROFILES_ACTIVE: native
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server.my-app.svc.cluster.local:8761/eureka
 

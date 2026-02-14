@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: problem-backend
+  namespace: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: problem-backend
+  template:
+    metadata:
+      labels:
+        app: problem-backend
+    spec:
+      initContainers:
+        - name: wait-for-mysql-problem
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL..."
+              until nc -z mysql-problem-service.my-app.svc.cluster.local 3306; do
+                sleep 5
+              done
+      containers:
+      - name: auth-backend
+        image: shejulv088/final_problem_service:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8082
+        envFrom:
+        - configMapRef:
+            name: problem-backend-config
+        - secretRef:
+            name: problem-backend-secret
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 90
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 5  
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+            #        resources:
+          #          requests:
+            #            memory: "150Mi"
+              #            cpu: "50m"
+              #          limits:
+            #            memory: "200Mi"
+            #            cpu: "100m"
