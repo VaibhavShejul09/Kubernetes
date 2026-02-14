@@ -16,7 +16,7 @@ spec:
 
       containers:
       - name: config-server
-        image: shejulv088/final_config_server:v1
+        image: shejulv088/final_config_server:v3
         ports:
         - containerPort: 8888
         

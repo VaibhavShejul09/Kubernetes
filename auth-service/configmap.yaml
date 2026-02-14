@@ -4,7 +4,7 @@ metadata:
   name: auth-backend-config
   namespace: my-app
 data:
-  SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
   SPRING_JPA_SHOW_SQL: "true"
   SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
 
@@ -13,5 +13,5 @@ data:
   SPRING_DATASOURCE_URL: jdbc:mysql://mysql-auth-service:3306/application_auth_db
   SPRING_DATASOURCE_USERNAME: root
   SPRING_REDIS_HOST: redis
-
+  SPRING_REDIS_PORT: "6379"
  

@@ -4,7 +4,7 @@ metadata:
   name: auth-backend-deploy
   namespace: my-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: auth-backend
@@ -26,7 +26,7 @@ spec:
               done
       containers:
       - name: auth-backend
-        image: shejulv088/final_auth_service
+        image: shejulv088/final_auth_service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
@@ -39,14 +39,18 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8081
-          initialDelaySeconds: 60
+          initialDelaySeconds: 90
           periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 5  
         readinessProbe:
           httpGet:
             path: /actuator/health
             port: 8081
-          initialDelaySeconds: 30
-          periodSeconds: 15
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
             #        resources:
           #          requests:
             #            memory: "150Mi"
